@@ -12,13 +12,11 @@ const routes = [
   {
     path: "/",
     element: <App />,
-    children: [
-      {
-        path: "quiz/:id",
-        element: <Quiz />,
-      },
-    ],
   },
+  {
+    path: "/quiz/:id",
+    element: <Quiz />
+  }
 ];
 
 const router = createBrowserRouter(routes);
