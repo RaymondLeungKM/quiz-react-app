@@ -1,8 +1,8 @@
-import { Box, Typography, Button, Grid, MobileStepper  } from "@mui/material";
-import { useTheme } from '@mui/material/styles';
+import { Box, Typography, Button, Grid, MobileStepper } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -48,7 +48,7 @@ function Quiz() {
   const navigate = useNavigate();
 
   return (
-    <Box>
+    <>
       <Button
         variant="contained"
         startIcon={<ArrowBackIcon />}
@@ -117,7 +117,7 @@ function Quiz() {
           />
         </Box>
       )}
-    </Box>
+    </>
   );
 }
 
