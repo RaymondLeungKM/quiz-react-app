@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import "./index.css";
 
 import { QueryClient, QueryClientProvider } from "react-query";
 
@@ -15,8 +14,8 @@ const routes = [
   },
   {
     path: "/quiz/:id",
-    element: <Quiz />
-  }
+    element: <Quiz />,
+  },
 ];
 
 const router = createBrowserRouter(routes);
