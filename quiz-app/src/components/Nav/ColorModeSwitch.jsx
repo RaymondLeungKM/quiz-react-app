@@ -58,7 +58,7 @@ const ColorModeSwitch = () => {
 
   return (
     <>
-      <FormControlLabel
+      <FormControlLabel sx={{ m: 0 }}
         control={<MaterialUISwitch sx={{ m: 1 }} checked={theme.palette.mode === 'dark' ? true : false} onClick={colorMode.toggleColorMode} />}
       />
     </>

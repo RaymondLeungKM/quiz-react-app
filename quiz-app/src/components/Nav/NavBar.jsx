@@ -1,23 +1,32 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import MenuIcon from '@mui/icons-material/Menu';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+import * as React from "react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import CssBaseline from "@mui/material/CssBaseline";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import MenuIcon from "@mui/icons-material/Menu";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
-import ColorModeSwitch from './ColorModeSwitch';
+import { NavLink } from "react-router-dom";
+
+import ColorModeSwitch from "./ColorModeSwitch";
 
 const drawerWidth = 240;
-const navItems = ['Home', 'About', 'Contact'];
+const navItems = [
+  {
+    name: "Home",
+    path: "/",
+  },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
+];
 
 function NavBar(props) {
   const { window } = props;
@@ -28,20 +37,29 @@ function NavBar(props) {
   };
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <Typography variant="h6" sx={{ my: 2 }}>
-        QuizUp
-      </Typography>
-      <Divider />
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: "center" }}>
-              <ListItemText primary={item} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+    <Box sx={{ textAlign: "center" }}>
+      <Box onClick={handleDrawerToggle}>
+        <Typography variant="h6" sx={{ my: 2 }}>
+          QuizUp
+        </Typography>
+        <Divider />
+        <List>
+          {navItems.map((item) => (
+            <NavLink to={item.path} key={item.name}>
+              <ListItem disablePadding>
+                <ListItemButton sx={{ textAlign: "center" }}>
+                  <ListItemText
+                    primary={item.name}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </NavLink>
+          ))}
+        </List>
+      </Box>
+      <Box>
+        <ColorModeSwitch />
+      </Box>
     </Box>
   );
 
@@ -53,28 +71,30 @@ function NavBar(props) {
       <CssBaseline />
       <AppBar component="nav">
         <Toolbar>
+          <Box sx={{ flexGrow: 1 }}>
+            <NavLink to="/">
+              <Typography variant="h6" component="div" color="#fff">
+                QuizUp
+              </Typography>
+            </NavLink>
+          </Box>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: "none" } }}
+            sx={{ display: { sm: "none" } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
-          >
-            QuizUp
-          </Typography>
-          <ColorModeSwitch />
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <ColorModeSwitch />
+          </Box>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             {navItems.map((item) => (
-              <Button key={item} sx={{ color: "#fff" }}>
-                {item}
-              </Button>
+              <NavLink to={item.path} key={item.name}>
+                <Button sx={{ color: "#fff" }}>{item.name}</Button>
+              </NavLink>
             ))}
           </Box>
         </Toolbar>

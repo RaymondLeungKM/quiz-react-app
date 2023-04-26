@@ -2,7 +2,6 @@ import * as React from "react";
 import { useQuery } from "react-query";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import ColorModeContext from "./context/ColorModeContext";
 
 import {
   Card,
@@ -42,8 +41,8 @@ function Home() {
             direction="row"
             justifyContent="center"
             alignItems="center"
-            spacing={0}
-            columns={{ xs: 4, sm: 8, md: 12 }}
+            gap={4}
+            columns={{ xs: 4, sm: 12 }}
           >
             {quizzes.length > 0 &&
               quizzes.map((quiz) => (
@@ -52,13 +51,12 @@ function Home() {
                   display="flex"
                   justifyContent="center"
                   alignItems="center"
-                  xs={2}
+                  xs={4}
                   sm={4}
                   md={4}
                   key={quiz.id}
                 >
                   <Card
-                    sx={{ maxWidth: 200 }}
                     key={quiz.id}
                     onClick={() => navigate(`/quiz/${quiz.id}`)}
                   >
