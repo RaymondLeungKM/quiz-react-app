@@ -57,6 +57,7 @@ function Quiz() {
   const [activeStep, setActiveStep] = useState(0);
 
   const [chosenAnswers, setChosenAnswers] = useState(null);
+  const [answeredCount, setAnsweredCount] = useState(0);
   const [quizResult, setQuizResult] = useState([]);
 
   const startQuiz = () => {
@@ -66,11 +67,17 @@ function Quiz() {
     countDownTimer();
   };
 
+  function formatDuration(value) {
+    const minute = Math.floor(value / 60);
+    const secondLeft = value - minute * 60;
+    return `${minute}:${secondLeft < 10 ? `0${secondLeft}` : secondLeft}`;
+  }
+
   const countDownTimer = () => {
     const interval = setInterval(() => {
       setTimeRemaining((prevTime) => {
         if (prevTime > 0) {
-          return prevTime - 30;
+          return prevTime - 1;
         } else {
           return null;
         }
@@ -123,7 +130,7 @@ function Quiz() {
       setDialogOpen(false)
     }
     axios
-      .post("http://localhost:3000/checkAnswers", { answers: chosenAnswers })
+      .post("http://localhost:3000/checkAnswers", { id: id, answers: chosenAnswers })
       .then((res) => {
         clearTimer();
         setQuizResult(res.data);
@@ -152,6 +159,13 @@ function Quiz() {
       clearTimer();
     }
   }, [timeRemaining]);
+
+  useEffect(() => {
+    if (chosenAnswers) {
+      const count = chosenAnswers.filter(ans => ans != null).length;
+      setAnsweredCount(count);
+    }
+  }, [chosenAnswers])
 
   const {
     isLoading,
@@ -201,7 +215,7 @@ function Quiz() {
         )}
         {quizStarted && !quizSubmitted && (
           <>
-            <Typography>Remaining Time: {timeRemaining}</Typography>
+            <Typography>Remaining Time: {formatDuration(timeRemaining)}</Typography>
             <Typography variant="h4" sx={{ mb: 8 }}>
               Question: {quiz.questions[activeStep].title}
             </Typography>
@@ -238,7 +252,7 @@ function Quiz() {
               </FormControl>
             </Box>
             {activeStep + 1 == maxSteps && (
-              <Button variant="contained" onClick={submit} sx={{ minHeight: "100px" }}>
+              <Button variant="contained" disabled={answeredCount != maxSteps} onClick={submit} sx={{ minHeight: "100px" }}>
                 Submit
               </Button>
             )}
@@ -280,12 +294,13 @@ function Quiz() {
         )}
         {quizSubmitted && !isReview && (
           <>
-            <Typography>Results:</Typography>
+            <Typography sx={{ mb : 2 }}>Results:</Typography>
             <Typography>
-              You got {quizResult.correctCount} out of {maxSteps} questions
+              {quizResult.score > 80 && 'Congratulations! '}You got {quizResult.correctCount} out of {maxSteps} questions
               correct!
             </Typography>
-            <Typography>Score: {quizResult.score}</Typography>
+            {quizResult.score < 60 && <Typography>Try harder next time!</Typography>}
+            <Typography sx={{ my : 2 }}>Score: {quizResult.score}</Typography>
             <Button variant="contained" onClick={() => setIsReview(true)}>
               Review your answers
             </Button>
@@ -298,9 +313,9 @@ function Quiz() {
               <Box key={question.id} sx={{ mb: 8 }}>
                 <Typography sx={{ mb: 6 }}>
                   Question: {question.title} - (
-                  {quizResult.list[index].isCorrect == true
+                  {chosenAnswers[index] != null ? (quizResult.list[index] == true
                     ? "Correct"
-                    : "Wrong"}
+                    : "Wrong") : "Un-answered"}
                   )
                 </Typography>
                 <Box sx={{ flexGrow: 1 }}>
@@ -309,7 +324,7 @@ function Quiz() {
                       aria-labelledby="radio-buttons-group-label"
                       name="radio-buttons-group"
                       sx={{ width: "100%" }}
-                      value={quizResult.list[index].id}
+                      value={chosenAnswers[index]}
                     >
                       <Grid container gap={4} justifyContent="center">
                         {question.answers.map((answer) => (
@@ -324,20 +339,20 @@ function Quiz() {
                               alignItems: "center"
                             }}
                             border={
-                              quizResult.list[index].id == answer.id ? (quizResult.list[index].isCorrect == true ? "2px solid green" : "2px solid red") : "1px solid"
+                              chosenAnswers[index] == answer.id ? (quizResult.list[index] == true ? "2px solid green" : "2px solid red") : "1px solid"
                             }
                             color={
-                              quizResult.list[index].id == answer.id ? (quizResult.list[index].isCorrect == true ? "green" : "red") : "inherit"
+                              chosenAnswers[index] == answer.id ? (quizResult.list[index] == true ? "green" : "red") : "inherit"
                             }
                           >
                             <FormControlLabel
                               sx={{ ml: 2 }}
                               value={answer.id}
-                              control={<Radio disabled={true} color={quizResult.list[index].isCorrect == true ? "success" : "warning" } />}
+                              control={<Radio disabled={true} color={quizResult.list[index] == true ? "success" : "warning" } />}
                               label={answer.content}
-                              disabled={quizResult.list[index].id == answer.id ? false : true}
+                              disabled={chosenAnswers[index] == answer.id ? false : true}
                             />
-                            {quizResult.list[index].id == answer.id ? (quizResult.list[index].isCorrect == true ? <CheckIcon sx={{ fontSize: '30px', color: "green" }} /> : <CloseIcon fontSize="medium" sx={{ fontSize: '30px', color: "red" }} />) : null}
+                            {chosenAnswers[index] == answer.id ? (quizResult.list[index] == true ? <CheckIcon sx={{ fontSize: '30px', color: "green" }} /> : <CloseIcon fontSize="medium" sx={{ fontSize: '30px', color: "red" }} />) : null}
                           </Grid>
                         ))}
                       </Grid>
@@ -370,12 +385,13 @@ function Quiz() {
         <DialogTitle id="alert-dialog-title">Time is up!</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Quiz will end now!
+            Quiz ended! <br />
+            You have answered {answeredCount} out of {maxSteps} questions!
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={resetQuiz}>Retry Quiz</Button>
-          <Button onClick={submit} autoFocus>Submit Anyway</Button>
+          {answeredCount != maxSteps && <Button onClick={resetQuiz}>Retry Quiz</Button>}
+          <Button onClick={submit} autoFocus>{answeredCount == maxSteps ? 'Submit' : 'Submit Anyway'}</Button>
         </DialogActions>
       </Dialog>
     </Box>

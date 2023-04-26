@@ -17,6 +17,7 @@ import ColorModeContext from "./context/ColorModeContext";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import { Routes, Route } from "react-router-dom";
+import QuizForm from "./QuizForm";
 
 function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -58,6 +59,8 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/quiz/:id" element={<Quiz />} />
+              <Route path="/quiz/:id/edit" element={<QuizForm />} />
+              <Route path="/quiz/add" element={<QuizForm />} />
             </Route>
           </Routes>
         </ThemeProvider>
