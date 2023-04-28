@@ -15,18 +15,12 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
 import { NavLink } from "react-router-dom";
+import { routes } from "../../router/routes";
 
 import ColorModeSwitch from "./ColorModeSwitch";
 
 const drawerWidth = 240;
-const navItems = [
-  {
-    name: "Home",
-    path: "/",
-  },
-  { name: "About", path: "/about" },
-  { name: "Contact", path: "/contact" },
-];
+const navItems = routes;
 
 function NavBar(props) {
   const { window } = props;

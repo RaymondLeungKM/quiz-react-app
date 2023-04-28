@@ -7,17 +7,13 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
 import * as React from "react";
-import Layout from "./components/Layout/Layout";
-import Home from "./Home";
-import Quiz from "./Quiz";
+import AppRoutes from "./router/routes.jsx";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ColorModeContext from "./context/ColorModeContext";
 import CssBaseline from "@mui/material/CssBaseline";
-
-import { Routes, Route } from "react-router-dom";
-import QuizForm from "./QuizForm";
+import { SnackbarProvider } from "notistack";
 
 function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -28,8 +24,10 @@ function App() {
     () => ({
       toggleColorMode: () => {
         setMode((prevMode) => {
-          console.log("prevMode=" + prevMode);
-          return prevMode === "light" ? "dark" : "light";
+          // console.log("prevMode=" + prevMode);
+          const mode = prevMode === "light" ? "dark" : "light";
+          localStorage.setItem("colorMode", mode);
+          return mode;
         });
       },
     }),
@@ -46,23 +44,36 @@ function App() {
     [mode]
   );
 
+  // handle initial and subsequent color mode change based on user system settings
   React.useEffect(() => {
+    // console.log("in prefersDarkMode useEffect");
     setMode(prefersDarkMode ? "dark" : "light");
   }, [prefersDarkMode]);
+
+  // load user's preference for color mode on initial load; will override system preference
+  React.useEffect(() => {
+    // console.log("initial useEffect");
+    const mode = prefersDarkMode ? "dark" : "light";
+    let cachedColorMode =
+      typeof localStorage != "undefined"
+        ? localStorage.getItem("colorMode")
+          ? localStorage.getItem("colorMode")
+          : mode
+        : mode;
+    // console.log("cachedColorMode=", cachedColorMode);
+    setMode(cachedColorMode);
+  }, []);
 
   return (
     <>
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/quiz/:id" element={<Quiz />} />
-              <Route path="/quiz/:id/edit" element={<QuizForm />} />
-              <Route path="/quiz/add" element={<QuizForm />} />
-            </Route>
-          </Routes>
+          <AppRoutes />
+          <SnackbarProvider
+            maxSnack={3}
+            anchorOrigin={{ horizontal: "right", vertical: "top" }}
+          />
         </ThemeProvider>
       </ColorModeContext.Provider>
     </>

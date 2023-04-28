@@ -57,10 +57,11 @@ function Home() {
                   key={quiz.id}
                 >
                   <Card
+                    sx={{ width: '500px', height: '200px' }}
                     key={quiz.id}
                     onClick={() => navigate(`/quiz/${quiz.id}`)}
                   >
-                    <CardActionArea>
+                    <CardActionArea sx={{ width: '100%', height: '100%' }}>
                       <CardContent>
                         <Typography gutterBottom variant="h5" component="div">
                           Quiz Name: {quiz.quiz_name}

@@ -20,8 +20,8 @@ import { useTheme } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import CloseIcon from '@mui/icons-material/Close';
-import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -32,11 +32,11 @@ import { useEffect, useState } from "react";
 let maxSteps = 0;
 let duration = 0;
 const answerMap = {
-  0: 'A',
-  1: 'B',
-  2: 'C',
-  3: 'D'
-}
+  0: "A",
+  1: "B",
+  2: "C",
+  3: "D",
+};
 
 const fetchQuiz = (id) =>
   axios.get(`http://localhost:3000/quiz/${id}`).then((res) => {
@@ -127,10 +127,13 @@ function Quiz() {
 
   const submit = () => {
     if (dialogOpen) {
-      setDialogOpen(false)
+      setDialogOpen(false);
     }
     axios
-      .post("http://localhost:3000/checkAnswers", { id: id, answers: chosenAnswers })
+      .post("http://localhost:3000/checkAnswers", {
+        id: id,
+        answers: chosenAnswers,
+      })
       .then((res) => {
         clearTimer();
         setQuizResult(res.data);
@@ -162,17 +165,18 @@ function Quiz() {
 
   useEffect(() => {
     if (chosenAnswers) {
-      const count = chosenAnswers.filter(ans => ans != null).length;
+      const count = chosenAnswers.filter((ans) => ans != null).length;
       setAnsweredCount(count);
     }
-  }, [chosenAnswers])
+  }, [chosenAnswers]);
 
   const {
-    isLoading,
-    error,
+    fetchQuizIsLoading,
+    fetchQuizError,
     data: quiz,
-  } = useQuery("allQuiz", () => fetchQuiz(id), {
+  } = useQuery(["quiz", id], () => fetchQuiz(id), {
     placeholderData: {},
+    enabled: !!id,
   });
 
   const navigate = useNavigate();
@@ -191,7 +195,9 @@ function Quiz() {
         {!quizStarted && (
           <>
             <Box sx={{ mb: 8 }}>
-              <Typography variant="h4" sx={{ mb: 2 }}>Quiz Name: {quiz.quiz_name}</Typography>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                Quiz Name: {quiz.quiz_name}
+              </Typography>
               <Typography>Quiz Category: {quiz.category}</Typography>
               <Typography>
                 Number of questions: {quiz.questions?.length}
@@ -207,6 +213,13 @@ function Quiz() {
               >
                 Go Back
               </Button>
+              <Button
+                variant="contained"
+                sx={{ mr: 4 }}
+                onClick={() => navigate(`/quiz/${id}/edit`)}
+              >
+                Edit Quiz
+              </Button>
               <Button variant="contained" onClick={startQuiz}>
                 Start Quiz!
               </Button>
@@ -215,7 +228,9 @@ function Quiz() {
         )}
         {quizStarted && !quizSubmitted && (
           <>
-            <Typography>Remaining Time: {formatDuration(timeRemaining)}</Typography>
+            <Typography>
+              Remaining Time: {formatDuration(timeRemaining)}
+            </Typography>
             <Typography variant="h4" sx={{ mb: 8 }}>
               Question: {quiz.questions[activeStep].title}
             </Typography>
@@ -240,10 +255,14 @@ function Quiz() {
                         }}
                       >
                         <FormControlLabel
-                          sx={{ pl: 2, py: 4, width: { xs: "80vw", md: "100%" }  }}
+                          sx={{
+                            pl: 2,
+                            py: 4,
+                            width: { xs: "80vw", md: "100%" },
+                          }}
                           value={answer.id}
                           control={<Radio />}
-                          label={answerMap[index] + '. ' + answer.content}
+                          label={answerMap[index] + ". " + answer.content}
                         />
                       </Grid>
                     ))}
@@ -252,7 +271,12 @@ function Quiz() {
               </FormControl>
             </Box>
             {activeStep + 1 == maxSteps && (
-              <Button variant="contained" disabled={answeredCount != maxSteps} onClick={submit} sx={{ minHeight: "100px" }}>
+              <Button
+                variant="contained"
+                disabled={answeredCount != maxSteps}
+                onClick={submit}
+                sx={{ minHeight: "100px" }}
+              >
                 Submit
               </Button>
             )}
@@ -294,13 +318,15 @@ function Quiz() {
         )}
         {quizSubmitted && !isReview && (
           <>
-            <Typography sx={{ mb : 2 }}>Results:</Typography>
+            <Typography sx={{ mb: 2 }}>Results:</Typography>
             <Typography>
-              {quizResult.score > 80 && 'Congratulations! '}You got {quizResult.correctCount} out of {maxSteps} questions
-              correct!
+              {quizResult.score > 80 && "Congratulations! "}You got{" "}
+              {quizResult.correctCount} out of {maxSteps} questions correct!
             </Typography>
-            {quizResult.score < 60 && <Typography>Try harder next time!</Typography>}
-            <Typography sx={{ my : 2 }}>Score: {quizResult.score}</Typography>
+            {quizResult.score < 60 && (
+              <Typography>Try harder next time!</Typography>
+            )}
+            <Typography sx={{ my: 2 }}>Score: {quizResult.score}</Typography>
             <Button variant="contained" onClick={() => setIsReview(true)}>
               Review your answers
             </Button>
@@ -313,9 +339,11 @@ function Quiz() {
               <Box key={question.id} sx={{ mb: 8 }}>
                 <Typography sx={{ mb: 6 }}>
                   Question: {question.title} - (
-                  {chosenAnswers[index] != null ? (quizResult.list[index] == true
-                    ? "Correct"
-                    : "Wrong") : "Un-answered"}
+                  {chosenAnswers[index] != null
+                    ? quizResult.list[index] == true
+                      ? "Correct"
+                      : "Wrong"
+                    : "Un-answered"}
                   )
                 </Typography>
                 <Box sx={{ flexGrow: 1 }}>
@@ -336,23 +364,68 @@ function Quiz() {
                               borderRadius: 2,
                               flexBasis: "45% !important",
                               display: "flex",
-                              alignItems: "center"
+                              alignItems: "center",
                             }}
                             border={
-                              chosenAnswers[index] == answer.id ? (quizResult.list[index] == true ? "2px solid green" : "2px solid red") : "1px solid"
+                              quizResult.correctAnswers[index] == answer.id
+                                ? "2px solid green"
+                                : chosenAnswers[index] == answer.id
+                                ? quizResult.list[index] == true
+                                  ? "2px solid green"
+                                  : "2px solid red"
+                                : "1px solid"
                             }
                             color={
-                              chosenAnswers[index] == answer.id ? (quizResult.list[index] == true ? "green" : "red") : "inherit"
+                              quizResult.correctAnswers[index] == answer.id
+                                ? "green"
+                                : chosenAnswers[index] == answer.id
+                                ? quizResult.list[index] == true
+                                  ? "green"
+                                  : "red"
+                                : "inherit"
                             }
                           >
                             <FormControlLabel
                               sx={{ ml: 2 }}
+                              className={
+                                quizResult.correctAnswers[index] == answer.id
+                                  ? "answer-correct"
+                                  : chosenAnswers[index] == answer.id
+                                  ? quizResult.list[index] == true
+                                    ? "answer-correct"
+                                    : "answer-incorrect"
+                                  : "inherit"
+                              }
                               value={answer.id}
-                              control={<Radio disabled={true} color={quizResult.list[index] == true ? "success" : "warning" } />}
-                              label={answer.content}
-                              disabled={chosenAnswers[index] == answer.id ? false : true}
+                              control={
+                                <Radio
+                                  color={
+                                    quizResult.list[index] == true
+                                      ? "success"
+                                      : "warning"
+                                  }
+                                />
+                              }
+                              label={
+                                answer.content +
+                                (quizResult.correctAnswers[index] == answer.id
+                                  ? " (correct answer)"
+                                  : "")
+                              }
+                              disabled
                             />
-                            {chosenAnswers[index] == answer.id ? (quizResult.list[index] == true ? <CheckIcon sx={{ fontSize: '30px', color: "green" }} /> : <CloseIcon fontSize="medium" sx={{ fontSize: '30px', color: "red" }} />) : null}
+                            {chosenAnswers[index] == answer.id ? (
+                              quizResult.list[index] == true ? (
+                                <CheckIcon
+                                  sx={{ fontSize: "30px", color: "green" }}
+                                />
+                              ) : (
+                                <CloseIcon
+                                  fontSize="medium"
+                                  sx={{ fontSize: "30px", color: "red" }}
+                                />
+                              )
+                            ) : null}
                           </Grid>
                         ))}
                       </Grid>
@@ -390,8 +463,12 @@ function Quiz() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          {answeredCount != maxSteps && <Button onClick={resetQuiz}>Retry Quiz</Button>}
-          <Button onClick={submit} autoFocus>{answeredCount == maxSteps ? 'Submit' : 'Submit Anyway'}</Button>
+          {answeredCount != maxSteps && (
+            <Button onClick={resetQuiz}>Retry Quiz</Button>
+          )}
+          <Button onClick={submit} autoFocus>
+            {answeredCount == maxSteps ? "Submit" : "Submit Anyway"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

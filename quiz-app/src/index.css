@@ -61,6 +61,15 @@ button:focus-visible {
   border: 1px solid white;
   cursor: pointer;
 }
+.answer-correct, .answer-correct * {
+  color: green !important;
+}
+.answer-incorrect, .answer-incorrect * {
+  color: red !important;
+}
+.inherit > .inherit * {
+  color: inherit;
+}
 
 @media (prefers-color-scheme: light) {
   :root {

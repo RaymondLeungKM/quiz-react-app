@@ -1,3 +1,6 @@
 1. Need to make the layout better (wait till the end)
 2. Need to make an admin panel for adding new quizzes, questions and answers
-3. Need to force submitting the answers when the time is up; Need to modify the backend so that when an answer is null or sth it automatically treats the answer as incorrect
+(done) 3. Need to force submitting the answers when the time is up; Need to modify the backend so that when an answer is null or sth it automatically treats the answer as incorrect
+(done) 4. Add user preference of dark mode in local storage such that it persist page refresh
+(done) 5. At least 1 answer must be chosen as the correct answer
+(done) 6. Lets add some default order values to both questions and answers.. (might be even hide them.. just kind of add the values in the background)
