@@ -1,17 +1,49 @@
 import { useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const fetchQuizzes = () =>
   axios.get("http://localhost:3000/quiz").then((res) => res.data);
 
+const deleteQuiz = () =>
+  axios
+    .post(`http://localhost:3000/quiz/delete/${selectedQuizId}`)
+    .then((res) => res.data);
+
 function Admin() {
+  const navigate = useNavigate();
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 5,
     page: 0,
   });
+
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const [deleteDialogVisible, setDeleteDiaglogVisible] = useState(false);
+  const [selectedQuizId, setSelectedQuizId] = useState(null);
+  const queryClient = new QueryClient();
+  const closeDialog = () => {
+    setDeleteDiaglogVisible(false);
+  };
+  const deleteHandler = () =>
+    useMutation(deleteQuiz, {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["quiz"]);
+      },
+    });
 
   const [rows, setRows] = useState([]);
 
@@ -25,12 +57,26 @@ function Admin() {
     { field: "created_date", headerName: "Created Date", width: 200 },
     {
       field: "actions",
-      type: "actions",
       headerName: "Actions",
-      width: 100,
+      width: 200,
+      sortable: false,
       cellClassName: "actions",
-      getActions: ({ id }) => {
-        return <p>i am a button</p>
+      renderCell: (params) => {
+        const editHandler = (e) => {
+          e.stopPropagation();
+          navigate(`/quiz/${params.id}/edit`);
+        };
+        const deleteHandler = (e) => {
+          e.stopPropagation();
+          setDeleteDiaglogVisible(true);
+          setSelectedQuizId(params.id);
+        };
+        return (
+          <>
+            <Button onClick={editHandler}>Edit</Button>
+            <Button onClick={deleteHandler}>Delete</Button>
+          </>
+        );
       },
     },
   ]);
@@ -53,6 +99,27 @@ function Admin() {
           pageSizeOptions={[5, 10, 20]}
         />
       </div>
+      <Dialog
+        fullScreen={fullScreen}
+        open={deleteDialogVisible}
+        onClose={closeDialog}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">{"Warning"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You are about to delete the selected quiz. Continue?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={closeDialog}>
+            Cancel
+          </Button>
+          <Button onClick={deleteHandler.mutate} autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
