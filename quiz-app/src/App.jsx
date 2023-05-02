@@ -13,7 +13,17 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ColorModeContext from "./context/ColorModeContext";
 import CssBaseline from "@mui/material/CssBaseline";
-import { SnackbarProvider } from "notistack";
+import { SnackbarProvider, closeSnackbar } from "notistack";
+import { IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
+const action = (snackbarId) => (
+  <>
+    <IconButton onClick={() => closeSnackbar(snackbarId)}>
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </>
+);
 
 function App() {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -73,6 +83,7 @@ function App() {
           <SnackbarProvider
             maxSnack={3}
             anchorOrigin={{ horizontal: "right", vertical: "top" }}
+            action={action}
           />
         </ThemeProvider>
       </ColorModeContext.Provider>

@@ -11,17 +11,16 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { enqueueSnackbar } from "notistack";
 
 const fetchQuizzes = () =>
   axios.get("http://localhost:3000/quiz").then((res) => res.data);
 
-const deleteQuiz = () =>
-  axios
-    .post(`http://localhost:3000/quiz/delete/${selectedQuizId}`)
-    .then((res) => res.data);
+const deleteQuiz = (id) => 
+  axios.post(`http://localhost:3000/quiz/delete/${id}`).then((res) => res.data);
 
 function Admin() {
   const navigate = useNavigate();
@@ -34,16 +33,19 @@ function Admin() {
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [deleteDialogVisible, setDeleteDiaglogVisible] = useState(false);
   const [selectedQuizId, setSelectedQuizId] = useState(null);
-  const queryClient = new QueryClient();
+
   const closeDialog = () => {
     setDeleteDiaglogVisible(false);
   };
-  const deleteHandler = () =>
-    useMutation(deleteQuiz, {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["quiz"]);
-      },
-    });
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation(deleteQuiz, {
+    onSuccess: (res) => {
+      console.log(res);
+      queryClient.invalidateQueries({ queryKey: ["allQuiz"] });
+      setDeleteDiaglogVisible(false);
+      enqueueSnackbar("Quiz deleted successfully!", { variant: "success" });
+    },
+  });
 
   const [rows, setRows] = useState([]);
 
@@ -81,7 +83,7 @@ function Admin() {
     },
   ]);
 
-  const { isLoading, error } = useQuery("allQuiz", fetchQuizzes, {
+  const { isLoading, error } = useQuery(["allQuiz"], fetchQuizzes, {
     onSuccess: (data) => {
       setRows(data);
     },
@@ -115,7 +117,7 @@ function Admin() {
           <Button autoFocus onClick={closeDialog}>
             Cancel
           </Button>
-          <Button onClick={deleteHandler.mutate} autoFocus>
+          <Button onClick={() => mutate(selectedQuizId)} autoFocus>
             Confirm
           </Button>
         </DialogActions>

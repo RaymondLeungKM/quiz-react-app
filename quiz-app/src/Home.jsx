@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +20,7 @@ function Home() {
     isLoading,
     error,
     data: quizzes,
-  } = useQuery("allQuiz", fetchQuizzes, {
+  } = useQuery(["allQuiz"], fetchQuizzes, {
     placeholderData: [],
   });
 
