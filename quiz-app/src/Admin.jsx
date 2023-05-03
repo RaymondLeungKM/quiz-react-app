@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
   useMediaQuery,
+  TextField,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -19,8 +22,19 @@ import { enqueueSnackbar } from "notistack";
 const fetchQuizzes = () =>
   axios.get("http://localhost:3000/quiz").then((res) => res.data);
 
-const deleteQuiz = (id) => 
+const deleteQuiz = (id) =>
   axios.post(`http://localhost:3000/quiz/delete/${id}`).then((res) => res.data);
+
+const fetchCategories = () =>
+  axios.get("http://localhost:3000/category").then((res) => res.data);
+
+const deleteCategory = (id) =>
+  axios
+    .post(`http://localhost:3000/category/delete/${id}`)
+    .then((res) => res.data);
+
+const editCategory = (category) =>
+  axios.post(`http://localhost:3000/category/${category.id}/edit`, category);
 
 function Admin() {
   const navigate = useNavigate();
@@ -31,18 +45,21 @@ function Admin() {
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
-  const [deleteDialogVisible, setDeleteDiaglogVisible] = useState(false);
-  const [selectedQuizId, setSelectedQuizId] = useState(null);
+  const [deleteDialogContent, setDeleteDialogContent] = useState("");
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryDialogVisible, setCategoryDialogVisible] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   const closeDialog = () => {
-    setDeleteDiaglogVisible(false);
+    setDeleteDialogVisible(false);
   };
   const queryClient = useQueryClient();
   const { mutate } = useMutation(deleteQuiz, {
     onSuccess: (res) => {
       console.log(res);
       queryClient.invalidateQueries({ queryKey: ["allQuiz"] });
-      setDeleteDiaglogVisible(false);
+      setDeleteDialogVisible(false);
       enqueueSnackbar("Quiz deleted successfully!", { variant: "success" });
     },
   });
@@ -70,8 +87,11 @@ function Admin() {
         };
         const deleteHandler = (e) => {
           e.stopPropagation();
-          setDeleteDiaglogVisible(true);
-          setSelectedQuizId(params.id);
+          setDeleteDialogContent(
+            "You are about to delete the selected quiz. Continue?"
+          );
+          setDeleteDialogVisible(true);
+          setSelectedId(params.id);
         };
         return (
           <>
@@ -83,16 +103,119 @@ function Admin() {
     },
   ]);
 
+  const [catRows, setCatRows] = useState([]);
+  const [catColumns, setCatColumns] = useState([
+    { field: "id", headerName: "Category ID", width: 100 },
+    { field: "name", headerName: "Category Name", width: 130 },
+    { field: "created_by", headerName: "Created By", width: 130 },
+    { field: "created_date", headerName: "Created Date", width: 200 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 200,
+      sortable: false,
+      cellClassName: "actions",
+      renderCell: (params) => {
+        const editHandler = (e) => {
+          e.stopPropagation();
+          setSelectedId(params.id);
+          setNewCategoryName(params.row.name);
+          setCategoryDialogVisible(true);
+        };
+        const deleteHandler = (e) => {
+          e.stopPropagation();
+          setDeleteDialogContent(
+            "You are about to delete the selected category. Continue?"
+          );
+          setDeleteDialogVisible(true);
+          setSelectedId(params.id);
+        };
+        return (
+          <>
+            <Button onClick={editHandler}>Edit</Button>
+            <Button onClick={deleteHandler}>Delete</Button>
+          </>
+        );
+      },
+    },
+  ]);
+
+  const { mutate: updateCategory } = useMutation(editCategory, {
+    onSuccess: (res) => {
+      console.log(res);
+      queryClient.invalidateQueries({ queryKey: ["allCategory"] });
+      setCategoryDialogVisible(false);
+      enqueueSnackbar("Category updated successfully!", { variant: "success" });
+    },
+  });
+  const handleEditCategory = () => {
+    const newCategory = {
+      id: selectedId,
+      name: newCategoryName,
+      createdBy: "Raymond",
+    };
+    updateCategory(newCategory);
+  };
+
+  const { mutate: removeCategory } = useMutation(deleteCategory, {
+    onSuccess: (res) => {
+      console.log(res);
+      queryClient.invalidateQueries({ queryKey: ["allCategory"] });
+      setDeleteDialogVisible(false);
+      enqueueSnackbar("Category deleted successfully!", { variant: "success" });
+    },
+  });
+  const handleDeleteCategory = () => {
+    const newCategory = {
+      id: selectedId,
+      name: newCategoryName,
+      createdBy: "Raymond",
+    };
+    removeCategory(newCategory);
+  };
+
+  const deleteDiaglogSubmit = () => {
+    if (
+      deleteDialogContent ==
+      "You are about to delete the selected quiz. Continue?"
+    ) {
+      mutate(selectedId);
+    } else {
+      removeCategory(selectedId);
+    }
+  };
+
   const { isLoading, error } = useQuery(["allQuiz"], fetchQuizzes, {
     onSuccess: (data) => {
-      setRows(data);
+      const formattedData = data.map((item) => {
+        const category = item.category.reduce((allNames, cat) => {
+          return allNames == "" ? cat.name : allNames + ", " + cat.name;
+        }, "");
+        return {
+          ...item,
+          category: category,
+        };
+      });
+      setRows(formattedData);
     },
   });
 
+  const { isCategoryLoading, isCatgegoryError } = useQuery(
+    ["allCategory"],
+    fetchCategories,
+    {
+      onSuccess: (data) => {
+        setCatRows(data);
+      },
+    }
+  );
+
   return (
     <>
-      <p>This is the admin dashboard</p>
-      <div style={{ height: 400, width: "100%" }}>
+      <Box sx={{ width: "100%" }}>
+        <Typography variant="h3" mb={3}>
+          All Quizzes
+        </Typography>
         <DataGrid
           columns={columns}
           rows={rows}
@@ -100,7 +223,19 @@ function Admin() {
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[5, 10, 20]}
         />
-      </div>
+      </Box>
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h3" mb={3}>
+          All Categories
+        </Typography>
+        <DataGrid
+          columns={catColumns}
+          rows={catRows}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[5, 10, 20]}
+        />
+      </Box>
       <Dialog
         fullScreen={fullScreen}
         open={deleteDialogVisible}
@@ -109,17 +244,41 @@ function Admin() {
       >
         <DialogTitle id="responsive-dialog-title">{"Warning"}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            You are about to delete the selected quiz. Continue?
-          </DialogContentText>
+          <DialogContentText>{deleteDialogContent}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={closeDialog}>
             Cancel
           </Button>
-          <Button onClick={() => mutate(selectedQuizId)} autoFocus>
+          <Button onClick={deleteDiaglogSubmit} autoFocus>
             Confirm
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={categoryDialogVisible}
+        onClose={() => setCategoryDialogVisible(false)}
+      >
+        <DialogTitle>Edit category</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            value={newCategoryName}
+            onChange={(event) => {
+              setNewCategoryName(event.target.value);
+            }}
+            margin="dense"
+            id="new-category-name"
+            label="Name"
+            fullWidth
+            variant="standard"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCategoryDialogVisible(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleEditCategory}>Submit</Button>
         </DialogActions>
       </Dialog>
     </>

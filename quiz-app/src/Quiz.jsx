@@ -198,7 +198,15 @@ function Quiz() {
               <Typography variant="h4" sx={{ mb: 2 }}>
                 Quiz Name: {quiz.quiz_name}
               </Typography>
-              <Typography>Quiz Category: {quiz.category}</Typography>
+              <Typography sx={{ mb: 2 }}>
+                Quiz Category:
+                {quiz.category &&
+                  quiz.category.map((cat) => (
+                    <span key={cat.id} style={{ border: "1px solid", borderRadius: "1rem", margin: "0 0.5rem", padding: "0.3rem 0.5rem"}}>
+                      {cat.name}
+                    </span>
+                  ))}
+              </Typography>
               <Typography>
                 Number of questions: {quiz.questions?.length}
               </Typography>
@@ -213,14 +221,18 @@ function Quiz() {
               >
                 Go Back
               </Button>
-              <Button
+              {/* <Button
                 variant="contained"
                 sx={{ mr: 4 }}
                 onClick={() => navigate(`/quiz/${id}/edit`)}
               >
                 Edit Quiz
-              </Button>
-              <Button variant="contained" onClick={startQuiz}>
+              </Button> */}
+              <Button
+                variant="contained"
+                onClick={startQuiz}
+                disabled={quiz.questions && quiz.questions.length == 0}
+              >
                 Start Quiz!
               </Button>
             </Box>

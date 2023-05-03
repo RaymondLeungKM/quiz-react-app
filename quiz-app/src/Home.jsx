@@ -57,17 +57,32 @@ function Home() {
                   key={quiz.id}
                 >
                   <Card
-                    sx={{ width: '500px', height: '200px' }}
+                    sx={{ width: "500px", height: "200px" }}
                     key={quiz.id}
                     onClick={() => navigate(`/quiz/${quiz.id}`)}
                   >
-                    <CardActionArea sx={{ width: '100%', height: '100%' }}>
+                    <CardActionArea sx={{ width: "100%", height: "100%" }}>
                       <CardContent>
                         <Typography gutterBottom variant="h5" component="div">
                           Quiz Name: {quiz.quiz_name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Category: {quiz.category}
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 4}}>
+                          {quiz.category &&
+                            quiz.category.map((cat) => (
+                              <Typography
+                                variant="span"
+                                key={cat.id}
+                                sx={{
+                                  border: "1px solid",
+                                  borderRadius: 999,
+                                  mx: 1,
+                                  px: 2,
+                                  py: 1
+                                }}
+                              >
+                                {cat.name}
+                              </Typography>
+                            ))}
                         </Typography>
                       </CardContent>
                     </CardActionArea>
