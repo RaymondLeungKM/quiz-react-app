@@ -8,7 +8,9 @@
 8. Add record for quiz results
 9. Login => only show quiz created by / accessible by user; block manual input in url
 10. Maybe add a chatgpt integration?
+11. jwt implementation for the frontend; Should pass the token in subsequent request after user logged in! Maybe we can also implement the auto refresh token or expires => log out function
 
 minor
 1. Click category => filter quizzes with the same category
 2. Make a dedicated home page..
+3. Transitions/effect (e.g. framer motion)

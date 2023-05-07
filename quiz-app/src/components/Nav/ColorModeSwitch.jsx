@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import ColorModeContext from "../../context/ColorModeContext";
 import { FormControlLabel, Switch } from "@mui/material";

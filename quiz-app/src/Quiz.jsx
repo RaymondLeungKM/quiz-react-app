@@ -29,6 +29,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+import { fetchQuiz } from "./api/react-query-actions";
+
 let maxSteps = 0;
 let duration = 0;
 const answerMap = {
@@ -37,13 +39,6 @@ const answerMap = {
   2: "C",
   3: "D",
 };
-
-const fetchQuiz = (id) =>
-  axios.get(`http://localhost:3000/quiz/${id}`).then((res) => {
-    maxSteps = res.data.questions.length;
-    duration = res.data.duration;
-    return res.data;
-  });
 
 function Quiz() {
   const [quizStarted, setQuizStarted] = useState(false);
@@ -175,6 +170,10 @@ function Quiz() {
     fetchQuizError,
     data: quiz,
   } = useQuery(["quiz", id], () => fetchQuiz(id), {
+    onSuccess: (res) => {
+      maxSteps = res.questions.length;
+      duration = res.duration;
+    },
     placeholderData: {},
     enabled: !!id,
   });

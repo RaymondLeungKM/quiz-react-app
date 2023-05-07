@@ -33,6 +33,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { useTheme } from "@mui/material/styles";
 
+import {
+  fetchQuiz,
+  fetchCategories,
+  addCategory,
+} from "./api/react-query-actions";
+
 let questionsTotal = 0;
 let duration = 0;
 
@@ -45,20 +51,6 @@ const MenuProps = {
       width: 250,
     },
   },
-};
-
-const fetchQuiz = (id) =>
-  axios.get(`http://localhost:3000/quiz/edit/${id}`).then((res) => {
-    questionsTotal = res.data.questions.length;
-    duration = res.data.duration;
-    return res.data;
-  });
-
-const fetchCategories = () =>
-  axios.get("http://localhost:3000/category").then((res) => res.data);
-
-const addCategory = (category) => {
-  return axios.post("http://localhost:3000/category/add", category).then((res) => res.data);
 };
 
 const getStyles = (categoryName, quizCategory, theme) => {

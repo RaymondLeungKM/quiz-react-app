@@ -14,27 +14,12 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
+import { fetchQuizzes, deleteQuiz, fetchCategories, deleteCategory, editCategory } from "./api/react-query-actions";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { enqueueSnackbar } from "notistack";
-
-const fetchQuizzes = () =>
-  axios.get("http://localhost:3000/quiz").then((res) => res.data);
-
-const deleteQuiz = (id) =>
-  axios.post(`http://localhost:3000/quiz/delete/${id}`).then((res) => res.data);
-
-const fetchCategories = () =>
-  axios.get("http://localhost:3000/category").then((res) => res.data);
-
-const deleteCategory = (id) =>
-  axios
-    .post(`http://localhost:3000/category/delete/${id}`)
-    .then((res) => res.data);
-
-const editCategory = (category) =>
-  axios.post(`http://localhost:3000/category/${category.id}/edit`, category);
 
 function Admin() {
   const navigate = useNavigate();
