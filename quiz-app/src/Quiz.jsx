@@ -26,7 +26,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios from "./utils/axios";
 import { useEffect, useState } from "react";
 
 import { fetchQuiz } from "./api/react-query-actions";
@@ -174,7 +174,6 @@ function Quiz() {
       maxSteps = res.questions.length;
       duration = res.duration;
     },
-    placeholderData: {},
     enabled: !!id,
   });
 
@@ -191,7 +190,7 @@ function Quiz() {
           justifyContent: "space-between",
         }}
       >
-        {!quizStarted && (
+        {!quizStarted && quiz && (
           <>
             <Box sx={{ mb: 8 }}>
               <Typography variant="h4" sx={{ mb: 2 }}>
@@ -201,7 +200,15 @@ function Quiz() {
                 Quiz Category:
                 {quiz.category &&
                   quiz.category.map((cat) => (
-                    <span key={cat.id} style={{ border: "1px solid", borderRadius: "1rem", margin: "0 0.5rem", padding: "0.3rem 0.5rem"}}>
+                    <span
+                      key={cat.id}
+                      style={{
+                        border: "1px solid",
+                        borderRadius: "1rem",
+                        margin: "0 0.5rem",
+                        padding: "0.3rem 0.5rem",
+                      }}
+                    >
                       {cat.name}
                     </span>
                   ))}

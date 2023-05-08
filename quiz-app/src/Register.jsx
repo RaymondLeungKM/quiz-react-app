@@ -7,19 +7,31 @@ import {
   OutlinedInput,
   InputAdornment,
   IconButton,
-  Button
+  Button,
 } from "@mui/material";
 import {
   AccountCircle,
   Visibility,
   VisibilityOff,
   Key,
+  Email,
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { register } from "./api/react-query-actions";
+import UserContext from "./context/UserContext";
+import jwt_decode from "jwt-decode";
+
+import { enqueueSnackbar } from "notistack";
 
 function Register() {
+  const { login: loginUser } = useContext(UserContext);
+
+  const [accountName, setAccountName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -27,6 +39,19 @@ function Register() {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  const registerHandler = (e) => {
+    e.preventDefault();
+    register(accountName, email, password).then(res=>{
+      enqueueSnackbar("Account created successfully!", { variant: "success" });
+      sessionStorage.setItem("jwt", res.token)
+      const decodedToken = jwt_decode(res.token);
+      loginUser({ ...decodedToken });
+      navigate("/")
+    }).catch(err => {
+      console.log(err)
+    })
+  }
 
   return (
     <>
@@ -41,26 +66,43 @@ function Register() {
             flexWrap: "wrap",
             margin: "2rem  0",
           }}
+          onSubmit={registerHandler}
         >
           <FormControl sx={{ m: 1, width: "60%" }} variant="outlined">
-            <InputLabel htmlFor="input-with-icon-adornment">Account</InputLabel>
+            <InputLabel htmlFor="accountName">Account Name</InputLabel>
             <OutlinedInput
-              id="input-with-icon-adornment"
+              id="accountName"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
               startAdornment={
                 <InputAdornment position="start">
                   <AccountCircle />
                 </InputAdornment>
               }
-              label="Account"
+              label="Account Name<"
             />
           </FormControl>
           <FormControl sx={{ m: 1, width: "60%" }} variant="outlined">
-            <InputLabel htmlFor="outlined-adornment-password">
-              Password
-            </InputLabel>
+            <InputLabel htmlFor="email">Email</InputLabel>
             <OutlinedInput
-              id="outlined-adornment-password"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              startAdornment={
+                <InputAdornment position="start">
+                  <Email />
+                </InputAdornment>
+              }
+              label="Email"
+            />
+          </FormControl>
+          <FormControl sx={{ m: 1, width: "60%" }} variant="outlined">
+            <InputLabel htmlFor="password">Password</InputLabel>
+            <OutlinedInput
+              id="password"
               type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               startAdornment={
                 <InputAdornment position="start">
                   <Key />

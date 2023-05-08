@@ -1,27 +1,34 @@
-import axios from "axios";
+import axios from "../utils/axios";
 
 export const fetchQuiz = (id) =>
-  axios.get(`http://localhost:3000/quiz/${id}`).then((res) => res.data);
+  axios.get(`/quiz/${id}`).then((res) => res.data);
 
-export const fetchQuizzes = () =>
-  axios.get("http://localhost:3000/quiz").then((res) => res.data);
+export const fetchQuizzes = () => axios.get("/quiz").then((res) => res.data);
 
 export const deleteQuiz = (id) =>
-  axios.post(`http://localhost:3000/quiz/delete/${id}`).then((res) => res.data);
+  axios.post(`/quiz/delete/${id}`).then((res) => res.data);
 
 export const fetchCategories = () =>
-  axios.get("http://localhost:3000/category").then((res) => res.data);
+  axios.get("/category").then((res) => res.data);
 
 export const deleteCategory = (id) =>
-  axios
-    .post(`http://localhost:3000/category/delete/${id}`)
-    .then((res) => res.data);
+  axios.post(`/category/delete/${id}`).then((res) => res.data);
 
 export const editCategory = (category) =>
-  axios.post(`http://localhost:3000/category/${category.id}/edit`, category);
+  axios.post(`/category/${category.id}/edit`, category);
 
 export const addCategory = (category) => {
-  return axios
-    .post("http://localhost:3000/category/add", category)
-    .then((res) => res.data);
+  return axios.post("/category/add", category).then((res) => res.data);
 };
+
+export const fetchQuizResult = () => {
+  return axios.get("/quiz/result").then(res => res.data.list)
+}
+
+export const login = (name, password) => {
+  return axios.post("/login", { name, password }).then((res) => res.data);
+};
+
+export const register = (name, email, password) => {
+  return axios.post("/register", { name, email, password }).then(res => res.data);
+}

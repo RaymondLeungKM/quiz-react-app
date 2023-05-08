@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
@@ -14,12 +14,19 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-import { fetchQuizzes, deleteQuiz, fetchCategories, deleteCategory, editCategory } from "./api/react-query-actions";
+import {
+  fetchQuizzes,
+  deleteQuiz,
+  fetchCategories,
+  deleteCategory,
+  editCategory,
+} from "./api/react-query-actions";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "./utils/axios";
 import { enqueueSnackbar } from "notistack";
+import { formatISODate } from "./utils/dateUtils";
 
 function Admin() {
   const navigate = useNavigate();
@@ -170,14 +177,16 @@ function Admin() {
     }
   };
 
-  const { isLoading, error } = useQuery(["allQuiz"], fetchQuizzes, {
+  const { data: quizData, isLoading, isFetching, isRefetching, error } = useQuery(["allQuiz"], fetchQuizzes, {
     onSuccess: (data) => {
       const formattedData = data.map((item) => {
         const category = item.category.reduce((allNames, cat) => {
           return allNames == "" ? cat.name : allNames + ", " + cat.name;
         }, "");
+        const created_date = formatISODate(item.created_date);
         return {
           ...item,
+          created_date: created_date,
           category: category,
         };
       });
@@ -185,15 +194,28 @@ function Admin() {
     },
   });
 
-  const { isCategoryLoading, isCatgegoryError } = useQuery(
+  const { data: categoryData, isCategoryLoading, isCatgegoryError } = useQuery(
     ["allCategory"],
     fetchCategories,
     {
       onSuccess: (data) => {
-        setCatRows(data);
+        const formattedData = data.map((item) => {
+          const created_date = formatISODate(item.created_date);
+          return {
+            ...item,
+            created_date: created_date,
+          };
+        });
+        setCatRows(formattedData);
       },
     }
   );
+
+  useEffect(() => {
+    console.log("isLoading=", isLoading)
+    console.log("isFetching=", isFetching)
+    console.log("isRefetching=", isRefetching)
+  }, [isLoading, isFetching, isRefetching])
 
   return (
     <>

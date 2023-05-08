@@ -16,13 +16,19 @@ import {
   Key
 } from "@mui/icons-material";
 
+import { login } from "./api/react-query-actions";
+
 import { useNavigate } from "react-router-dom";
 import { useState, useContext } from "react";
 import UserContext from "./context/UserContext";
+import jwt_decode from "jwt-decode";
+import { enqueueSnackbar } from "notistack";
 
 function Login() {
-  const colorMode = useContext(ColorModeContext);
+  const { login: loginUser } = useContext(UserContext);
   
+  const [accountName, setAccountName] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -33,7 +39,14 @@ function Login() {
 
   const loginHandler = (e) => {
     e.preventDefault();
-    console.log("in login handler")
+    login(accountName, password).then(res => {
+      sessionStorage.setItem("jwt", res.token)
+      const decodedToken = jwt_decode(res.token);
+      loginUser({ ...decodedToken });
+      navigate("/")
+    }).catch(err => {
+      enqueueSnackbar(err.response.data.msg, { variant: "error" });
+    })
   }
 
   return (
@@ -47,6 +60,8 @@ function Login() {
             <InputLabel htmlFor="input-with-icon-adornment">Account</InputLabel>
             <OutlinedInput
               id="input-with-icon-adornment"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
               startAdornment={
                 <InputAdornment position="start">
                   <AccountCircle />
@@ -61,6 +76,8 @@ function Login() {
             </InputLabel>
             <OutlinedInput
               id="outlined-adornment-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               type={showPassword ? "text" : "password"}
               startAdornment={
                 <InputAdornment position="start">

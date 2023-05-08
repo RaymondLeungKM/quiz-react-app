@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, useContext, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -18,17 +18,41 @@ import { NavLink } from "react-router-dom";
 import { routes } from "../../router/routes";
 
 import ColorModeSwitch from "./ColorModeSwitch";
+import UserContext from "../../context/UserContext";
 
 const drawerWidth = 240;
-const navItems = routes;
 
 function NavBar(props) {
   const { window } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [navItems, setNavItems] = useState(routes);
+
+  const { user } = useContext(UserContext);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
   };
+
+  useEffect(() => {
+    if (user != null) {
+      console.log("user=", user);
+      let loggedInRoutes;
+      loggedInRoutes = navItems.filter((route) => route.name != "Login");
+      if (user.isAdmin) {
+        loggedInRoutes = loggedInRoutes.concat([
+          { name: "Add Quiz", path: "/quiz/add" },
+          { name: "Admin", path: "/admin" },
+        ]);
+      }
+      loggedInRoutes = loggedInRoutes.concat([
+        { name: "Quiz Result", path: "/quiz/result" },
+        { name: "Logout", path: "/logout" },
+      ]);
+      setNavItems([...loggedInRoutes]);
+    } else {
+      setNavItems([...routes]);
+    }
+  }, [user]);
 
   const drawer = (
     <Box sx={{ textAlign: "center" }}>
@@ -42,9 +66,7 @@ function NavBar(props) {
             <NavLink to={item.path} key={item.name}>
               <ListItem disablePadding>
                 <ListItemButton sx={{ textAlign: "center" }}>
-                  <ListItemText
-                    primary={item.name}
-                  />
+                  <ListItemText primary={item.name} />
                 </ListItemButton>
               </ListItem>
             </NavLink>

@@ -25,7 +25,7 @@ import {
 import Stack from "@mui/joy/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import axios from "axios";
+import axios from "./utils/axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -106,7 +106,6 @@ function QuizForm() {
     ["quiz", id],
     () => fetchQuiz(id),
     {
-      placeholderData: {},
       enabled: !!id,
       onSuccess: (data) => {
         console.log(data);
@@ -136,9 +135,7 @@ function QuizForm() {
     }
   );
 
-  const { data: categories } = useQuery(["allCategory"], fetchCategories, {
-    placeholderData: [],
-  });
+  const { data: categories } = useQuery(["allCategory"], fetchCategories);
 
   // Note that questions must be added before their corresponding answers can be added (questionId required)
   // Maybe it is better to separate the questions array and the answers array(maybe a map is better here)
@@ -329,7 +326,7 @@ function QuizForm() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        {"editMode=" + editMode}
+        {/* {"editMode=" + editMode} */}
         <Stack>
           <Typography variant="h4">
             {editMode ? "Edit" : "Add"} Quiz Form
