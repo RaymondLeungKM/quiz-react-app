@@ -42,16 +42,20 @@ function Register() {
 
   const registerHandler = (e) => {
     e.preventDefault();
-    register(accountName, email, password).then(res=>{
-      enqueueSnackbar("Account created successfully!", { variant: "success" });
-      sessionStorage.setItem("jwt", res.token)
-      const decodedToken = jwt_decode(res.token);
-      loginUser({ ...decodedToken });
-      navigate("/")
-    }).catch(err => {
-      console.log(err)
-    })
-  }
+    register(accountName, email, password)
+      .then((res) => {
+        enqueueSnackbar("Account created successfully!", {
+          variant: "success",
+        });
+        sessionStorage.setItem("jwt", res.token);
+        const decodedToken = jwt_decode(res.token);
+        loginUser({ ...decodedToken });
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   return (
     <>
@@ -68,9 +72,13 @@ function Register() {
           }}
           onSubmit={registerHandler}
         >
-          <FormControl sx={{ m: 1, width: "60%" }} variant="outlined">
+          <FormControl
+            sx={{ m: 1, width: { sm: "100%", md: "60%" } }}
+            variant="outlined"
+          >
             <InputLabel htmlFor="accountName">Account Name</InputLabel>
             <OutlinedInput
+              autoFocus={true}
               id="accountName"
               value={accountName}
               onChange={(e) => setAccountName(e.target.value)}
@@ -82,7 +90,10 @@ function Register() {
               label="Account Name<"
             />
           </FormControl>
-          <FormControl sx={{ m: 1, width: "60%" }} variant="outlined">
+          <FormControl
+            sx={{ m: 1, width: { sm: "100%", md: "60%" } }}
+            variant="outlined"
+          >
             <InputLabel htmlFor="email">Email</InputLabel>
             <OutlinedInput
               id="email"
@@ -96,7 +107,7 @@ function Register() {
               label="Email"
             />
           </FormControl>
-          <FormControl sx={{ m: 1, width: "60%" }} variant="outlined">
+          <FormControl sx={{ m: 1, width: { sm: "100%", md: "60%" } }} variant="outlined">
             <InputLabel htmlFor="password">Password</InputLabel>
             <OutlinedInput
               id="password"

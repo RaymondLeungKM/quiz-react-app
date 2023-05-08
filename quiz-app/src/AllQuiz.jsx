@@ -64,24 +64,24 @@ function AllQuiz() {
               container
               direction="row"
               alignItems="center"
-              rowGap={4}
+              rowSpacing={4}
+              width="1200px"
+              maxWidth="80vw"
             >
               {categories &&
                 categories.length > 0 &&
                 categories.map((category) => (
                   <Grid
                     item
+                    xs={12}
+                    md={6}
                     display="flex"
-                    alignItems="center"
                     justifyContent="center"
-                    flexGrow={1}
-                    maxWidth="50%"
                     key={category.id}
                   >
                     <Card
                       sx={{
-                        width: "30rem",
-                        minWidth: "300px",
+                        width: { xs: "100%", md: "20rem", lg: "25rem" },
                         height: "200px",
                       }}
                       key={category.id}
@@ -132,7 +132,9 @@ function AllQuiz() {
                 container
                 direction="row"
                 alignItems="center"
-                rowGap={4}
+                width="1200px"
+                maxWidth="80vw"
+                rowSpacing={4}
               >
                 {quizzes
                   .filter(
@@ -143,17 +145,15 @@ function AllQuiz() {
                   .map((quiz) => (
                     <Grid
                       item
+                      xs={12}
+                      md={6}
                       display="flex"
                       justifyContent="center"
-                      alignItems="center"
                       key={quiz.id}
-                      flexGrow={1}
-                      maxWidth="50%"
                     >
                       <Card
                         sx={{
-                          width: "30rem",
-                          minWidth: "300px",
+                          width: { xs: "100%", md: "20rem", lg: "25rem" },
                           height: "200px",
                         }}
                         key={quiz.id}
