@@ -3,7 +3,7 @@ export const routes = [
 //   { name: "About", path: "/about" },
 //   { name: "Contact", path: "/contact" },
 // Quiz
-  { name: "Browse Quiz", path: "/quiz" },
+  { name: "Browse Quiz", path: "/allquiz" },
   // { name: "Add Quiz", path: "/quiz/add" },
   // { name: "Quiz Result", path: "/quiz/result" },
 // Auth

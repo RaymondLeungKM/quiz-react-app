@@ -17,7 +17,7 @@ const AppRoutes = () => {
         {/* Home */}
         <Route path="/" element={<Home />} />
         {/* Quiz Related */}
-        <Route path="/quiz" element={<AllQuiz />} />
+        <Route path="/allquiz" element={<AllQuiz />} />
         <Route path="/quiz/result" element={<QuizResult />} />
         <Route path="/quiz/:id" element={<Quiz />} />
         <Route path="/quiz/:id/edit" element={<QuizForm />} />

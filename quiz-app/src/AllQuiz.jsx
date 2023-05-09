@@ -10,8 +10,8 @@ import {
 import ClearIcon from "@mui/icons-material/Clear";
 
 import { useQuery } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { fetchQuizzes, fetchCategories } from "./api/react-query-actions";
 import BackdropContext from "./context/BackdropContext";
@@ -22,6 +22,24 @@ function AllQuiz() {
   const backdropContext = useContext(BackdropContext);
 
   const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const selectCategoryHandler = (id) => {
+    if (id) {
+      setSelectedCategory(id);
+      sessionStorage.setItem("selectedCategory", id);
+    } else {
+      setSelectedCategory(null);
+      sessionStorage.removeItem("selectedCategory");
+    }
+  };
+
+  useEffect(() => {
+    const cachedCategory = sessionStorage.getItem("cachedCategory");
+    if (cachedCategory) {
+      setSelectedCategory(cachedCategory);
+      sessionStorage.removeItem("cachedCategory");
+    }
+  }, []);
 
   const {
     isLoading,
@@ -85,7 +103,7 @@ function AllQuiz() {
                         height: "200px",
                       }}
                       key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
+                      onClick={() => selectCategoryHandler(category.id)}
                     >
                       <CardActionArea sx={{ width: "100%", height: "100%" }}>
                         <CardContent>
@@ -115,9 +133,10 @@ function AllQuiz() {
                 variant="outlined"
                 endIcon={<ClearIcon />}
                 sx={{ ml: 2 }}
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => selectCategoryHandler(null)}
               >
-                {categories.find((cat) => cat.id == selectedCategory).name}
+                {categories &&
+                  categories.find((cat) => cat.id == selectedCategory).name}
               </Button>
             </Typography>
 
@@ -125,7 +144,7 @@ function AllQuiz() {
               All Quizzes:
             </Typography>
 
-            {quizzes.length > 0 && (
+            {quizzes && quizzes.length > 0 && (
               <Grid
                 component={motion.div}
                 layout
@@ -197,10 +216,12 @@ function AllQuiz() {
                   ))}
               </Grid>
             )}
-            {quizzes.filter(
-              (quiz) =>
-                quiz.category.find((cat) => cat.id == selectedCategory) != null
-            ).length == 0 && <>No Quizzes yet!</>}
+            {quizzes &&
+              quizzes.filter(
+                (quiz) =>
+                  quiz.category.find((cat) => cat.id == selectedCategory) !=
+                  null
+              ).length == 0 && <>No Quizzes yet!</>}
           </motion.div>
         </AnimatePresence>
       )}

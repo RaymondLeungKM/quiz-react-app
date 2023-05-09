@@ -109,6 +109,11 @@ function Quiz() {
 
   const backOut = () => {
     clearTimer();
+    const cachedCategory = sessionStorage.getItem("selectedCategory");
+    if (cachedCategory) {
+      sessionStorage.setItem("cachedCategory", cachedCategory);
+      sessionStorage.removeItem("selectedCategory");
+    }
     navigate(-1);
   };
 
@@ -179,6 +184,26 @@ function Quiz() {
 
   const navigate = useNavigate();
 
+  // handle review quiz results
+  useEffect(() => {
+    const reviewMode = sessionStorage.getItem("reviewMode");
+    if (reviewMode == "true") {
+      setIsReview(true);
+      const historicalQuizResult = JSON.parse(
+        sessionStorage.getItem("quizResult")
+      );
+      setChosenAnswers(historicalQuizResult.answers);
+      setQuizResult(historicalQuizResult);
+      // removed cache
+      sessionStorage.removeItem("reviewMode");
+      sessionStorage.removeItem("quizResult");
+    }
+  }, []);
+
+  const backToResults = () => {
+    navigate("/quiz/result");
+  };
+
   return (
     <Box sx={{ display: "flex", justifyContent: "center" }}>
       <Box
@@ -190,7 +215,7 @@ function Quiz() {
           justifyContent: "space-between",
         }}
       >
-        {!quizStarted && quiz && (
+        {!quizStarted && !isReview && quiz && (
           <>
             <Box sx={{ mb: 8 }}>
               <Typography variant="h4" sx={{ mb: 2 }}>
@@ -350,111 +375,118 @@ function Quiz() {
             </Button>
           </>
         )}
-        {quizSubmitted && isReview && (
+        {isReview && (
           <>
             <Typography sx={{ mb: 4 }}>Review Mode</Typography>
-            {quiz.questions.map((question, index) => (
-              <Box key={question.id} sx={{ mb: 8 }}>
-                <Typography sx={{ mb: 6 }}>
-                  Question: {question.title} - (
-                  {chosenAnswers[index] != null
-                    ? quizResult.list[index] == true
-                      ? "Correct"
-                      : "Wrong"
-                    : "Un-answered"}
-                  )
-                </Typography>
-                <Box sx={{ flexGrow: 1 }}>
-                  <FormControl sx={{ width: "100%" }}>
-                    <RadioGroup
-                      aria-labelledby="radio-buttons-group-label"
-                      name="radio-buttons-group"
-                      sx={{ width: "100%" }}
-                      value={chosenAnswers[index]}
-                    >
-                      <Grid container gap={4} justifyContent="center">
-                        {question.answers.map((answer) => (
-                          <Grid
-                            item
-                            xs={6}
-                            key={answer.id}
-                            sx={{
-                              borderRadius: 2,
-                              flexBasis: "45% !important",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                            border={
-                              quizResult.correctAnswers[index] == answer.id
-                                ? "2px solid green"
-                                : chosenAnswers[index] == answer.id
-                                ? quizResult.list[index] == true
-                                  ? "2px solid green"
-                                  : "2px solid red"
-                                : "1px solid"
-                            }
-                            color={
-                              quizResult.correctAnswers[index] == answer.id
-                                ? "green"
-                                : chosenAnswers[index] == answer.id
-                                ? quizResult.list[index] == true
-                                  ? "green"
-                                  : "red"
-                                : "inherit"
-                            }
-                          >
-                            <FormControlLabel
-                              sx={{ ml: 2 }}
-                              className={
+            {quiz &&
+              quiz.questions.map((question, index) => (
+                <Box key={question.id} sx={{ mb: 8 }}>
+                  <Typography sx={{ mb: 6 }}>
+                    Question: {question.title} - (
+                    {chosenAnswers[index] != null
+                      ? quizResult.list[index] == true
+                        ? "Correct"
+                        : "Wrong"
+                      : "Un-answered"}
+                    )
+                  </Typography>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <FormControl sx={{ width: "100%" }}>
+                      <RadioGroup
+                        aria-labelledby="radio-buttons-group-label"
+                        name="radio-buttons-group"
+                        sx={{ width: "100%" }}
+                        value={chosenAnswers[index]}
+                      >
+                        <Grid container gap={4} justifyContent="center">
+                          {question.answers.map((answer) => (
+                            <Grid
+                              item
+                              xs={6}
+                              key={answer.id}
+                              sx={{
+                                borderRadius: 2,
+                                flexBasis: "45% !important",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                              border={
                                 quizResult.correctAnswers[index] == answer.id
-                                  ? "answer-correct"
+                                  ? "2px solid green"
                                   : chosenAnswers[index] == answer.id
                                   ? quizResult.list[index] == true
-                                    ? "answer-correct"
-                                    : "answer-incorrect"
+                                    ? "2px solid green"
+                                    : "2px solid red"
+                                  : "1px solid"
+                              }
+                              color={
+                                quizResult.correctAnswers[index] == answer.id
+                                  ? "green"
+                                  : chosenAnswers[index] == answer.id
+                                  ? quizResult.list[index] == true
+                                    ? "green"
+                                    : "red"
                                   : "inherit"
                               }
-                              value={answer.id}
-                              control={
-                                <Radio
-                                  color={
-                                    quizResult.list[index] == true
-                                      ? "success"
-                                      : "warning"
-                                  }
-                                />
-                              }
-                              label={
-                                answer.content +
-                                (quizResult.correctAnswers[index] == answer.id
-                                  ? " (correct answer)"
-                                  : "")
-                              }
-                              disabled
-                            />
-                            {chosenAnswers[index] == answer.id ? (
-                              quizResult.list[index] == true ? (
-                                <CheckIcon
-                                  sx={{ fontSize: "30px", color: "green" }}
-                                />
-                              ) : (
-                                <CloseIcon
-                                  fontSize="medium"
-                                  sx={{ fontSize: "30px", color: "red" }}
-                                />
-                              )
-                            ) : null}
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </RadioGroup>
-                  </FormControl>
+                            >
+                              <FormControlLabel
+                                sx={{ ml: 2 }}
+                                className={
+                                  quizResult.correctAnswers[index] == answer.id
+                                    ? "answer-correct"
+                                    : chosenAnswers[index] == answer.id
+                                    ? quizResult.list[index] == true
+                                      ? "answer-correct"
+                                      : "answer-incorrect"
+                                    : "inherit"
+                                }
+                                value={answer.id}
+                                control={
+                                  <Radio
+                                    color={
+                                      quizResult.list[index] == true
+                                        ? "success"
+                                        : "warning"
+                                    }
+                                  />
+                                }
+                                label={
+                                  answer.content +
+                                  (quizResult.correctAnswers[index] == answer.id
+                                    ? " (correct answer)"
+                                    : "")
+                                }
+                                disabled
+                              />
+                              {chosenAnswers[index] == answer.id ? (
+                                quizResult.list[index] == true ? (
+                                  <CheckIcon
+                                    sx={{ fontSize: "30px", color: "green" }}
+                                  />
+                                ) : (
+                                  <CloseIcon
+                                    fontSize="medium"
+                                    sx={{ fontSize: "30px", color: "red" }}
+                                  />
+                                )
+                              ) : null}
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </RadioGroup>
+                    </FormControl>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
-            <Button variant="contained" onClick={resetQuiz}>
-              Restart Quiz
-            </Button>
+              ))}
+            {quizSubmitted ? (
+              <Button variant="contained" onClick={resetQuiz}>
+                Restart Quiz
+              </Button>
+            ) : (
+              <Button variant="contained" onClick={backToResults}>
+                Back
+              </Button>
+            )}
           </>
         )}
       </Box>

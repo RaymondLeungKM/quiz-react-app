@@ -65,8 +65,8 @@ function NavBar(props) {
           {navItems.map((item) => (
             <NavLink to={item.path} key={item.name}>
               <ListItem disablePadding>
-                <ListItemButton sx={{ textAlign: "center" }}>
-                  <ListItemText primary={item.name} />
+                <ListItemButton sx={{ textAlign: "center", color: (theme) => theme.palette.text.primary }}>
+                  <ListItemText primary={item.name}/>
                 </ListItemButton>
               </ListItem>
             </NavLink>

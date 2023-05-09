@@ -47,8 +47,9 @@ function Register() {
         enqueueSnackbar("Account created successfully!", {
           variant: "success",
         });
-        sessionStorage.setItem("jwt", res.token);
-        const decodedToken = jwt_decode(res.token);
+        sessionStorage.setItem("jwt", res.access_token);
+        sessionStorage.setItem("refresh_token", res.refresh_token);
+        const decodedToken = jwt_decode(res.access_token);
         loginUser({ ...decodedToken });
         navigate("/");
       })

@@ -147,6 +147,34 @@ function QuizForm() {
         title: "",
         order: newQuestionOrder ? newQuestionOrder : 0,
       });
+      // default add 4 answers per question
+      setAnswers((ansPrevState) => {
+        const ansNewState = [...ansPrevState];
+        ansNewState[newQuestionOrder] = [];
+        ansNewState[newQuestionOrder] = ansNewState[newQuestionOrder].concat([
+          {
+            content: "",
+            order: 0,
+            isCorrect: false,
+          },
+          {
+            content: "",
+            order: 1,
+            isCorrect: false,
+          },
+          {
+            content: "",
+            order: 2,
+            isCorrect: false,
+          },
+          {
+            content: "",
+            order: 3,
+            isCorrect: false,
+          },
+        ]);
+        return ansNewState;
+      });
       return newState;
     });
   };
@@ -325,203 +353,211 @@ function QuizForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        {/* {"editMode=" + editMode} */}
-        <Stack>
-          <Typography variant="h4">
-            {editMode ? "Edit" : "Add"} Quiz Form
-          </Typography>
-          <FormControl sx={{ m: 3 }} error={error} variant="standard">
-            <TextField
-              id="quiz-title"
-              label="Quiz Title"
-              value={quizTitle}
-              onChange={(event) => {
-                setQuizTitle(event.target.value);
-              }}
-            />
-          </FormControl>
-          {/* Maybe change to autocomplete component with multiple selct and on-the-fly adding capabilities */}
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel id="category-select-label">Category</InputLabel>
-            <Select
-              labelId="category-select-label"
-              id="category-select-chip"
-              multiple
-              value={quizCategory}
-              onChange={handleCategoryChange}
-              input={
-                <OutlinedInput id="select-multiple-chip" label="Category" />
-              }
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} />
-                  ))}
-                </Box>
-              )}
-              MenuProps={MenuProps}
+      <Box sx={{ width: { xs: "100%", sm: "30rem", md: "40rem", lg: "50rem" }, minWidth: "18rem" }}>
+        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+          {/* {"editMode=" + editMode} */}
+          <Stack gap={3}>
+            <Typography variant="h4">
+              {editMode ? "Edit" : "Add"} Quiz Form
+            </Typography>
+            <FormControl
+              sx={{ width: "100%" }}
+              error={error}
+              variant="standard"
             >
-              {categories.map((category) => (
-                <MenuItem
-                  key={category.id}
-                  value={category.name}
-                  style={getStyles(category.name, quizCategory, theme)}
+              <TextField
+                id="quiz-title"
+                label="Quiz Title"
+                value={quizTitle}
+                onChange={(event) => {
+                  setQuizTitle(event.target.value);
+                }}
+              />
+            </FormControl>
+            {/* Maybe change to autocomplete component with multiple selct and on-the-fly adding capabilities */}
+            <FormControl sx={{ width: "100%" }}>
+              <InputLabel id="category-select-label">Category</InputLabel>
+              <Select
+                labelId="category-select-label"
+                id="category-select-chip"
+                multiple
+                value={quizCategory}
+                onChange={handleCategoryChange}
+                input={
+                  <OutlinedInput id="select-multiple-chip" label="Category" />
+                }
+                renderValue={(selected) => (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip key={value} label={value} />
+                    ))}
+                  </Box>
+                )}
+                MenuProps={MenuProps}
+              >
+                {categories &&
+                  categories.map((category) => (
+                    <MenuItem
+                      key={category.id}
+                      value={category.name}
+                      style={getStyles(category.name, quizCategory, theme)}
+                    >
+                      {category.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+              <Button
+                sx={{ mt: 3 }}
+                variant="outlined"
+                onClick={() => setCategoryDialogVisible(true)}
+              >
+                Add a category
+              </Button>
+            </FormControl>
+            <FormControl error={error} variant="standard">
+              <TextField
+                id="quiz-duration"
+                label="Quiz Duration (mins)"
+                value={quizDuration}
+                onChange={(event) => {
+                  setQuizDuration(event.target.value);
+                }}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+              />
+            </FormControl>
+            {/* Questions Group Start */}
+            {questions.length > 0 &&
+              questions.map((question, qIndex) => (
+                <Box
+                  key={qIndex}
+                  sx={{ p: 2, border: "1px solid", borderRadius: 2, mb: 4 }}
                 >
-                  {category.name}
-                </MenuItem>
+                  <Typography>Question {qIndex + 1}</Typography>
+                  <FormControl sx={{ m: 3 }} error={error} variant="standard">
+                    <TextField
+                      id={"question-" + `${qIndex + 1}` + "-title"}
+                      label={"Question " + `${qIndex + 1}` + " Title"}
+                      value={question.title}
+                      onChange={(e) => setQuestionProperty(e, qIndex, "title")}
+                    />
+                  </FormControl>
+                  <FormControl sx={{ m: 3 }} error={error} variant="standard">
+                    <TextField
+                      id={"question-" + `${qIndex + 1}` + "-order"}
+                      label={"Question " + `${qIndex + 1}` + " Order"}
+                      value={question.order}
+                      onChange={(e) => setQuestionProperty(e, qIndex, "order")}
+                      inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                    />
+                  </FormControl>
+                  {/* Answers Group Start */}
+                  {answers[qIndex] &&
+                    answers[qIndex].length > 0 &&
+                    answers[qIndex].map((anwser, aIndex) => (
+                      <Box key={aIndex} sx={{ pl: 4 }}>
+                        <Typography>Answer {aIndex + 1}</Typography>
+                        <Stack direction="row" alignItems="center">
+                          <FormControl
+                            sx={{ m: 3 }}
+                            error={error}
+                            variant="standard"
+                          >
+                            <TextField
+                              id={"anwser-" + `${+aIndex + 1}` + "-content"}
+                              label={"Answer " + `${+aIndex + 1}` + " Content"}
+                              value={anwser.content}
+                              onChange={(e) =>
+                                setAnswerProperty(e, qIndex, aIndex, "content")
+                              }
+                            />
+                          </FormControl>
+                          <FormControl
+                            sx={{ m: 3 }}
+                            error={error}
+                            variant="standard"
+                          >
+                            <TextField
+                              id={"anwser-" + `${+aIndex + 1}` + "-order"}
+                              label={"Anwser " + `${+aIndex + 1}` + " Order"}
+                              value={anwser.order}
+                              onChange={(e) =>
+                                setAnswerProperty(e, qIndex, aIndex, "order")
+                              }
+                              inputProps={{
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                              }}
+                            />
+                          </FormControl>
+                          <FormControl
+                            sx={{ m: 3 }}
+                            error={error}
+                            variant="standard"
+                          >
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={anwser.isCorrect}
+                                  onChange={(e) =>
+                                    setAnswerProperty(
+                                      e,
+                                      qIndex,
+                                      aIndex,
+                                      "isCorrect"
+                                    )
+                                  }
+                                  inputProps={{
+                                    "aria-label":
+                                      "answer-" + aIndex + "-isCorrect",
+                                  }}
+                                />
+                              }
+                              label="Correct"
+                            />
+                          </FormControl>
+                          <IconButton
+                            aria-label="delete"
+                            sx={{ mr: 4 }}
+                            variant="outlined"
+                            onClick={() => removeAnswerHandler(qIndex, aIndex)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Stack>
+                      </Box>
+                    ))}
+                  {/* End of Answers Group */}
+                  <Button
+                    sx={{ mt: 1, mr: 1 }}
+                    variant="outlined"
+                    onClick={() => addAnswerHandler(qIndex)}
+                  >
+                    Add an answer
+                  </Button>
+                  <Button
+                    sx={{ mt: 1, mr: 1 }}
+                    variant="outlined"
+                    onClick={() => removeQuestionHandler(qIndex)}
+                  >
+                    Remove this question
+                  </Button>
+                </Box>
               ))}
-            </Select>
+            {/* End of Questions Group */}
             <Button
               sx={{ mt: 1, mr: 1 }}
               variant="outlined"
-              onClick={() => setCategoryDialogVisible(true)}
+              onClick={addQuestionHandler}
             >
-              Add a category
+              Add a question
             </Button>
-          </FormControl>
-          <FormControl sx={{ m: 3 }} error={error} variant="standard">
-            <TextField
-              id="quiz-duration"
-              label="Quiz Duration (mins)"
-              value={quizDuration}
-              onChange={(event) => {
-                setQuizDuration(event.target.value);
-              }}
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-            />
-          </FormControl>
-          {/* Questions Group Start */}
-          {questions.length > 0 &&
-            questions.map((question, qIndex) => (
-              <Box
-                key={qIndex}
-                sx={{ p: 2, border: "1px solid", borderRadius: 2, mb: 4 }}
-              >
-                <Typography>Question {qIndex + 1}</Typography>
-                <FormControl sx={{ m: 3 }} error={error} variant="standard">
-                  <TextField
-                    id={"question-" + `${qIndex + 1}` + "-title"}
-                    label={"Question " + `${qIndex + 1}` + " Title"}
-                    value={question.title}
-                    onChange={(e) => setQuestionProperty(e, qIndex, "title")}
-                  />
-                </FormControl>
-                <FormControl sx={{ m: 3 }} error={error} variant="standard">
-                  <TextField
-                    id={"question-" + `${qIndex + 1}` + "-order"}
-                    label={"Question " + `${qIndex + 1}` + " Order"}
-                    value={question.order}
-                    onChange={(e) => setQuestionProperty(e, qIndex, "order")}
-                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                  />
-                </FormControl>
-                {/* Answers Group Start */}
-                {answers[qIndex] &&
-                  answers[qIndex].length > 0 &&
-                  answers[qIndex].map((anwser, aIndex) => (
-                    <Box key={aIndex} sx={{ pl: 4 }}>
-                      <Typography>Answer {aIndex + 1}</Typography>
-                      <Stack direction="row" alignItems="center">
-                        <FormControl
-                          sx={{ m: 3 }}
-                          error={error}
-                          variant="standard"
-                        >
-                          <TextField
-                            id={"anwser-" + `${+aIndex + 1}` + "-content"}
-                            label={"Answer " + `${+aIndex + 1}` + " Content"}
-                            value={anwser.content}
-                            onChange={(e) =>
-                              setAnswerProperty(e, qIndex, aIndex, "content")
-                            }
-                          />
-                        </FormControl>
-                        <FormControl
-                          sx={{ m: 3 }}
-                          error={error}
-                          variant="standard"
-                        >
-                          <TextField
-                            id={"anwser-" + `${+aIndex + 1}` + "-order"}
-                            label={"Anwser " + `${+aIndex + 1}` + " Order"}
-                            value={anwser.order}
-                            onChange={(e) =>
-                              setAnswerProperty(e, qIndex, aIndex, "order")
-                            }
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "[0-9]*",
-                            }}
-                          />
-                        </FormControl>
-                        <FormControl
-                          sx={{ m: 3 }}
-                          error={error}
-                          variant="standard"
-                        >
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={anwser.isCorrect}
-                                onChange={(e) =>
-                                  setAnswerProperty(
-                                    e,
-                                    qIndex,
-                                    aIndex,
-                                    "isCorrect"
-                                  )
-                                }
-                                inputProps={{
-                                  "aria-label":
-                                    "answer-" + aIndex + "-isCorrect",
-                                }}
-                              />
-                            }
-                            label="Correct"
-                          />
-                        </FormControl>
-                        <IconButton
-                          aria-label="delete"
-                          sx={{ mr: 4 }}
-                          variant="outlined"
-                          onClick={() => removeAnswerHandler(qIndex, aIndex)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Stack>
-                    </Box>
-                  ))}
-                {/* End of Answers Group */}
-                <Button
-                  sx={{ mt: 1, mr: 1 }}
-                  variant="outlined"
-                  onClick={() => addAnswerHandler(qIndex)}
-                >
-                  Add an answer
-                </Button>
-                <Button
-                  sx={{ mt: 1, mr: 1 }}
-                  variant="outlined"
-                  onClick={() => removeQuestionHandler(qIndex)}
-                >
-                  Remove this question
-                </Button>
-              </Box>
-            ))}
-          {/* End of Questions Group */}
-          <Button
-            sx={{ mt: 1, mr: 1 }}
-            variant="outlined"
-            onClick={addQuestionHandler}
-          >
-            Add a question
-          </Button>
-          <Button sx={{ mt: 1, mr: 1 }} type="submit" variant="contained">
-            {editMode ? "Submit" : "Add Quiz"}
-          </Button>
-        </Stack>
-      </form>
+            <Button sx={{ mt: 1, mr: 1 }} type="submit" variant="contained">
+              {editMode ? "Submit" : "Add Quiz"}
+            </Button>
+          </Stack>
+        </form>
+      </Box>
+
       <Dialog
         open={categoryDialogVisible}
         onClose={() => setCategoryDialogVisible(false)}
