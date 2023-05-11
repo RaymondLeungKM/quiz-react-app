@@ -48,7 +48,7 @@ function QuizResult() {
               >
                 <Stack gap={3}>
                   <Typography>
-                    Quiz:
+                    Quiz:{" "}
                     {quizzes &&
                       quizzes.find((quiz) => quiz.id == result.quizId)
                         .quiz_name}
